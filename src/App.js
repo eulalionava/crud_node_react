@@ -30,7 +30,6 @@ class App extends Component{
   
           <div className="container py-4">
             <div className="row">
-              // Add component list, form, edit.
               <Route path="/" exact component={ List } />
               <Route path="/form" component={ Form } />
               <Route path="/edit/:employeeId" component={ Edit } />

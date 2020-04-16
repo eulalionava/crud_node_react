@@ -2,7 +2,12 @@ import React from 'react';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
+import { Link } from "react-router-dom";
 import axios from 'axios';
+
+//sweetalert2
+import Swal from 'sweetalert2/dist/sweetalert2.js'
+import 'sweetalert2/src/sweetalert2.scss'
 
 class listComponent extends React.Component  {
 
@@ -14,12 +19,16 @@ class listComponent extends React.Component  {
   }
 
   componentDidMount(){
-      const url = "http://localhost:4000/empleado/list";
+      this.getListado();
+  }
 
+  getListado(){
+      const url = "http://localhost:4000/empleado/list";
       axios.get(url).then( res=>{
-        const data = res.data.data;
-        this.setState({ listEmployee:data });
-        
+        if(res.data.success){
+          const data = res.data.data;
+          this.setState({ listEmployee:data });
+        }
       })
       .catch(error=>{
         alert("Error server" + error);
@@ -59,15 +68,59 @@ class listComponent extends React.Component  {
           <td>{data.address}</td>
           <td>{data.phone}</td>
           <td>
-            <button className="btn btn-outline-info "> Edit </button>
+            <Link className="btn btn-outline-info" to={'/edit/'+data.id}>Edit</Link>
           </td>
           <td>
-            <button className="btn btn-outline-danger "> Delete </button>
+            <button class="btn btn-outline-danger" onClick={()=>this.onDelete(data.id)}> Delete </button>
           </td>
         </tr>
       )
     });
   }
+
+  onDelete(id){
+    Swal.fire({
+      title: 'Are you sure?',
+      text: 'You will not be able to recover this imaginary file!',
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.value) {
+        this.sendDelete(id)
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        Swal.fire(
+          'Cancelled',
+          'Your imaginary file is safe :)',
+          'error'
+        )
+      }
+    })
+  }
+  
+  sendDelete(userId){
+    // url de backend
+    const baseUrl = "http://localhost:4000/empleado/delete"    // parameter data post
+    // network
+    axios.post(baseUrl,{
+      id:userId
+    })
+    .then(response =>{
+      if (response.data.success) {
+        Swal.fire(
+          'Deleted!',
+          'Your employee has been deleted.',
+          'success'
+        )
+        this.getListado();
+      }
+    })
+    .catch ( error => {
+      alert("Error 325 ")
+    })
+  }
+
 }
 
 
